@@ -76,6 +76,7 @@ const [previews, setPreviews] = useState([]);   // array of preview URLs
       window.location.href = "chat.openai://";
     }, 200); // 200ms delay is usually enough
   } catch (err) {
+    await navigator.clipboard.writeText(err);
     setShowManualCopy(true);
   }
 }
