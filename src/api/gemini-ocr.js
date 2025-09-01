@@ -1,55 +1,41 @@
-// /api/gemini-ocr.js
+/* eslint-env node */
+/* eslint-env node */
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const apiKey = import.meta.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error(
-    "Gemini API key not found. Add VITE_GEMINI_API_KEY in your .env file."
-  );
-}
-
-const genAI = new GoogleGenerativeAI(apiKey);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+    res.status(405).json({ error: "Method not allowed" });
+    return;
   }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    res.status(500).json({ error: "Missing API key" });
+    return;
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   try {
     const { imagesBase64, mimeTypes, prompt } = req.body;
-
     if (!imagesBase64 || !imagesBase64.length) {
-      return res.status(400).json({ error: "No images provided" });
+      res.status(400).json({ error: "No images provided" });
+      return;
     }
 
-    const content = [{ 
-      text: prompt || "Extract the text from these images. Return verbatim text only." 
-    }];
-    
-    imagesBase64.forEach((img, i) => {
-      content.push({
-        inlineData: {
-          data: img,
-          mimeType: mimeTypes[i] || "image/png",
-        },
-      });
-    });
+    const content = [
+      { text: prompt || "Extract the text from these images. Return verbatim text only." },
+      ...imagesBase64.map((img, i) => ({
+        inlineData: { data: img, mimeType: mimeTypes[i] || "image/png" }
+      }))
+    ];
 
-    const result = await model.generateContent({ contents: [{ role: "user", parts: content }] });
+    const result = await model.generateContent(content);
     const response = await result.response;
-
-    res.status(200).json({ text: response.text() });
+    res.json({ text: response.text() });
   } catch (err) {
     console.error("Gemini OCR error:", err);
     res.status(500).json({ error: "Gemini OCR failed" });
   }
 }
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '10mb',
-    },
-  },
-};

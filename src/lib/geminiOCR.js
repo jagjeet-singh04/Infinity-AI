@@ -1,28 +1,34 @@
 // src/lib/geminiOCR.js
 import { fileToBase64 } from "./fileToBase64";
 
-export async function extractTextWithGemini(files, userPrompt = "") {
-  if (!files || !files.length) return "";
+/**
+ * Extract text from one or more images using Gemini
+ * @param {File[]} files - array of images
+ * @param {string} userPrompt - custom prompt
+ * @returns {Promise<string>} - combined text
+ */
+export async function extractTextWithGemini(files, userPrompt) {
+  if (!files.length) return "";
 
+  // Convert all images to Base64
   const base64Images = await Promise.all(files.map(fileToBase64));
+
+  // Construct one combined prompt
+  const combinedPrompt = `${userPrompt}\n\nImages:\n${base64Images
+    .map((dataUrl, i) => `Image ${i + 1}: ${dataUrl}`)
+    .join("\n\n")}`;
 
   const response = await fetch("/api/gemini-ocr", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      imagesBase64: base64Images.map((dataUrl) => {
-        // Remove the data:image/...;base64, part
-        return dataUrl.split(",")[1];
-      }),
+      imagesBase64: base64Images.map((dataUrl) => dataUrl.split(",")[1]), // only base64
       mimeTypes: files.map((f) => f.type || "image/png"),
-      prompt: userPrompt || "Extract the text from these images. Return verbatim.",
+      prompt: userPrompt,
     }),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || "Backend OCR failed");
-  }
+  if (!response.ok) throw new Error("Backend OCR failed");
 
   const result = await response.json();
   return result.text || "";
