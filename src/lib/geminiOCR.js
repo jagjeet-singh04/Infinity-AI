@@ -14,14 +14,15 @@ export async function extractTextWithGemini(files, userPrompt = "") {
 
   // Call the serverless API
   const response = await fetch("/api/gemini-ocr", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      imagesBase64: base64Images.map((dataUrl) => dataUrl.split(",")[1]), // only base64
-      mimeTypes: files.map((f) => f.type || "image/png"),
-      prompt: userPrompt || "Extract the text from these images. Return verbatim.",
-    }),
-  });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    imagesBase64: base64Images.map((dataUrl) => dataUrl.split(",")[1]),
+    mimeTypes: files.map((f) => f.type || "image/png"),
+    prompt: userPrompt || "Extract the text from these images. Return verbatim.",
+  }),
+});
+
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
