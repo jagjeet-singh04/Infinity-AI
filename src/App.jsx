@@ -43,34 +43,43 @@ const [previews, setPreviews] = useState([]);   // array of preview URLs
 
 
   async function handleOpenInChatGPT() {
-    if (!extractedText.length) {
-      setError("No extracted text to send.");
-      return;
-    }
-    setError("");
-    try {
-      const allText = extractedText.join("\n\n---\n\n");
-      await navigator.clipboard.writeText(allText);
-      window.open("https://chat.openai.com", "_blank", "noopener,noreferrer");
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-      setShowManualCopy(true);
-    }
+  if (!extractedText.length) {
+    setError("No extracted text to send.");
+    return;
   }
+  setError("");
+
+  try {
+    const allText = extractedText.join("\n\n---\n\n");
+    await navigator.clipboard.writeText(allText);
+    
+    // Web only, do not trigger app
+    window.open("https://chat.openai.com", "_blank", "noopener,noreferrer");
+  } catch (err) {
+    console.warn("Clipboard write failed:", err);
+    setShowManualCopy(true);
+  }
+}
+
 
   // NEW: specifically open ChatGPT **app** on mobile (using custom scheme)
   async function handleOpenInChatGPTApp() {
-    if (!extractedText.length) return;
-    try {
-      const allText = extractedText.join("\n\n---\n\n");
-      await navigator.clipboard.writeText(allText);
+  if (!extractedText.length) return;
 
-      // ChatGPT app supports custom deep link on mobile
-      window.location.href = "com.chat.openai://"; 
-    } catch (err) {
-      setShowManualCopy(true);
-    }
+  try {
+    const allText = extractedText.join("\n\n---\n\n");
+    await navigator.clipboard.writeText(allText);
+
+    // Delay redirect slightly to ensure clipboard write succeeds
+    setTimeout(() => {
+      // Deep link to ChatGPT mobile app
+      window.location.href = "chat.openai://";
+    }, 200); // 200ms delay is usually enough
+  } catch (err) {
+    setShowManualCopy(true);
   }
+}
+
 
   async function handleRemove(idx) {
     setFiles((prev) => prev.filter((_, i) => i !== idx));
