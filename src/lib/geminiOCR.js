@@ -18,7 +18,7 @@ export async function extractTextWithGemini(files, userPrompt) {
     .map((dataUrl, i) => `Image ${i + 1}: ${dataUrl}`)
     .join("\n\n")}`;
 
-  const response = await fetch("http://localhost:5000/api/gemini-ocr", {
+  const response = await fetch("/api/gemini-ocr", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
