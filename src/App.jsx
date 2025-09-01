@@ -73,7 +73,7 @@ const [previews, setPreviews] = useState([]);   // array of preview URLs
     // Delay redirect slightly to ensure clipboard write succeeds
     setTimeout(() => {
       // Deep link to ChatGPT mobile app
-     window.location.href = "intent://#Intent;package=com.openai.chatgpt;end";
+    window.location.href = "chat.openai://";
 
     }, 200); // 200ms delay is usually enough
   } catch (err) {
