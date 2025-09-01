@@ -1,9 +1,11 @@
 // /api/gemini-ocr.js
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const apiKey = process.env.GEMINI_API_KEY;
+const apiKey = import.meta.env.GEMINI_API_KEY;
 if (!apiKey) {
-  throw new Error("Gemini API key not found. Add GEMINI_API_KEY in your environment variables.");
+  throw new Error(
+    "Gemini API key not found. Add VITE_GEMINI_API_KEY in your .env file."
+  );
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
