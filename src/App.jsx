@@ -41,35 +41,44 @@ export default function App() {
   }
 
   async function handleOpenChatGPT() {
-    if (!extractedText.length) {
-      setError("No extracted text to send.");
-      return;
-    }
-    setError("");
-
-    try {
-      const allText = extractedText.join("\n\n---\n\n");
-      await navigator.clipboard.writeText(allText);
-
-      // Try opening the ChatGPT app first
-      const appLink = "chat.openai://";
-      const webLink = "https://chat.openai.com";
-
-      const timeout = setTimeout(() => {
-        // If app didn't open, fallback to web
-        window.open(webLink, "_blank", "noopener,noreferrer");
-      }, 1000);
-
-      // Attempt to open app
-      window.location.href = appLink;
-
-      // Clear timeout if app opens
-      window.addEventListener("blur", () => clearTimeout(timeout), { once: true });
-    } catch (err) {
-      console.warn("Clipboard write failed:", err);
-      setShowManualCopy(true);
-    }
+  if (!extractedText.length) {
+    setError("No extracted text to send.");
+    return;
   }
+  setError("");
+
+  try {
+    const allText = extractedText.join("\n\n---\n\n");
+    await navigator.clipboard.writeText(allText);
+
+    // Deep link for ChatGPT app (iOS + Android)
+    const appLink = "chat.openai://chat"; // <-- more specific than just chat.openai://
+    const webLink = "https://chat.openai.com";
+
+    // Create an invisible iframe trick (iOS Safari + Chrome on Android)
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+    iframe.src = appLink;
+    document.body.appendChild(iframe);
+
+    const now = Date.now();
+
+    const timeout = setTimeout(() => {
+      // If app did not open, fallback to web
+      if (Date.now() - now < 1500) {
+        window.open(webLink, "_blank", "noopener,noreferrer");
+      }
+      document.body.removeChild(iframe);
+    }, 1200);
+
+    // Extra safety: clear timeout if user actually left page
+    window.addEventListener("blur", () => clearTimeout(timeout), { once: true });
+  } catch (err) {
+    console.warn("Clipboard write failed:", err);
+    setShowManualCopy(true);
+  }
+}
+
 
   async function handleRemove(idx) {
     setFiles((prev) => prev.filter((_, i) => i !== idx));

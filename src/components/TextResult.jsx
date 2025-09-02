@@ -4,7 +4,7 @@ export default function TextResult({
   error,
   onExtract,
   onOpenChat,
-  onOpenChatApp,   // new
+  // new
   onCopy,
   hasImage,
 }) {
@@ -26,16 +26,10 @@ export default function TextResult({
           className="w-full py-3 rounded bg-green-600 text-white font-medium"
           disabled={texts.length === 0}
         >
-          Open in ChatGPT (Web)
+          Open in ChatGPT
         </button>
 
-        <button
-          onClick={onOpenChatApp}
-          className="w-full py-3 rounded bg-purple-600 text-white font-medium"
-          disabled={texts.length === 0}
-        >
-          Open in ChatGPT App 📱
-        </button>
+
       </div>
 
       <div className="mt-3">
