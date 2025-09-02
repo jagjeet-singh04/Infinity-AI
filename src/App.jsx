@@ -52,8 +52,8 @@ export default function App() {
     await navigator.clipboard.writeText(allText);
 
     // Try to open only the ChatGPT app
-    // const appLink = "chatgpt://chat.openai.com/";
-    const appLink = "https://chat.openai.com/";
+    const appLink = "chatgpt://chat.openai.com/";
+    // const appLink = "https://chat.openai.com/";
 
     // Redirect user directly
     window.location.href = appLink;
