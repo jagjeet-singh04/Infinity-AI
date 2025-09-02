@@ -40,7 +40,7 @@ export default function App() {
     }
   }
 
-  async function handleOpenInChatGPT() {
+  async function handleOpenChatGPT() {
     if (!extractedText.length) {
       setError("No extracted text to send.");
       return;
@@ -50,7 +50,21 @@ export default function App() {
     try {
       const allText = extractedText.join("\n\n---\n\n");
       await navigator.clipboard.writeText(allText);
-      window.open("https://chat.openai.com", "_blank", "noopener,noreferrer");
+
+      // Try opening the ChatGPT app first
+      const appLink = "chat.openai://";
+      const webLink = "https://chat.openai.com";
+
+      const timeout = setTimeout(() => {
+        // If app didn't open, fallback to web
+        window.open(webLink, "_blank", "noopener,noreferrer");
+      }, 1000);
+
+      // Attempt to open app
+      window.location.href = appLink;
+
+      // Clear timeout if app opens
+      window.addEventListener("blur", () => clearTimeout(timeout), { once: true });
     } catch (err) {
       console.warn("Clipboard write failed:", err);
       setShowManualCopy(true);
@@ -68,7 +82,7 @@ export default function App() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow p-5">
         <h1 className="text-center text-xl font-semibold mb-3">Infinity-AI</h1>
         <p className="text-sm text-gray-500 text-center mb-4">
-          Upload or take up to 5 photos, extract text with Gemini, then copy or open ChatGPT.
+          Upload or take up to 5 photos, extract text with Gemini, then open ChatGPT.
         </p>
 
         <Upload
@@ -93,7 +107,7 @@ export default function App() {
             loading={loading}
             error={error}
             onExtract={handleExtract}
-            onOpenChat={handleOpenInChatGPT}
+            onOpenChat={handleOpenChatGPT}   // only ONE button now
             onCopy={() => {
               navigator.clipboard.writeText(extractedText.join("\n\n---\n\n")).catch(() => {
                 setShowManualCopy(true);
